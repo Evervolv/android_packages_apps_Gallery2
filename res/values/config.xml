@@ -25,6 +25,8 @@
     <bool name="needsSamsungCamMode">false</bool>
     <!-- HTC Camcorder Mode -->
     <bool name="needsHTCCamMode">false</bool>
+    <!-- Allows setting video size before recording starts -->
+    <bool name="needsEarlyVideoSize">false</bool>
     <!-- Adjust the aspect tolerance through a multiplier. Default: 1 -->
     <integer name="aspectToleranceMultiplier">1</integer>
 </resources>

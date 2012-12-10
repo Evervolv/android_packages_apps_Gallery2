@@ -141,6 +141,9 @@ public class Util {
     // HTC camcorder mode
     private static boolean sHTCCamMode;
 
+    // For setting video size before recording starts
+    private static boolean sEarlyVideoSize;
+
     // Aspect tolerance multiplier
     private static int sToleranceMultiplier;
 
@@ -158,6 +161,7 @@ public class Util {
         // These come from the config, but are needed before parameters are set.
         sSamsungCamMode = context.getResources().getBoolean(R.bool.needsSamsungCamMode);
         sHTCCamMode = context.getResources().getBoolean(R.bool.needsHTCCamMode);
+        sEarlyVideoSize = context.getResources().getBoolean(R.bool.needsEarlyVideoSize);
         sToleranceMultiplier = context.getResources().getInteger(R.integer.aspectToleranceMultiplier);
     }
 
@@ -171,6 +175,10 @@ public class Util {
 
     public static boolean useSamsungCamMode() {
         return sSamsungCamMode;
+    }
+
+    public static boolean needsEarlyVideoSize() {
+        return sEarlyVideoSize;
     }
 
     // Rotates the bitmap by the specified degree.
