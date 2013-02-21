@@ -614,10 +614,6 @@ public class AlbumSetPage extends ActivityState implements
                 PicasaSource.requestSync(activity);
                 return true;
             }
-            case R.id.action_settings: {
-                activity.startActivity(new Intent(activity, GallerySettings.class));
-                return true;
-            }
             default:
                 return false;
         }
