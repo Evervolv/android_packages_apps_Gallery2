@@ -19,4 +19,6 @@
 <resources>
     <!-- Maximum recording length in milliseconds. 0 means unlimited. -->
     <integer name="max_video_recording_length">0</integer>
+    <!-- Adjust the aspect tolerance through a multiplier. Default: 1 -->
+    <integer name="aspectToleranceMultiplier">1</integer>
 </resources>

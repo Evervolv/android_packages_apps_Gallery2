@@ -135,6 +135,10 @@ public class Util {
     private static float sPixelDensity = 1;
     private static ImageFileNamer sImageFileNamer;
 
+
+    // Aspect tolerance multiplier
+    private static int sToleranceMultiplier;
+
     private Util() {
     }
 
@@ -146,6 +150,7 @@ public class Util {
         sPixelDensity = metrics.density;
         sImageFileNamer = new ImageFileNamer(
                 context.getString(R.string.image_file_name_format));
+        sToleranceMultiplier = context.getResources().getInteger(R.integer.aspectToleranceMultiplier);
     }
 
     public static int dpToPixel(int dp) {
@@ -444,7 +449,7 @@ public class Util {
     public static Size getOptimalPreviewSize(Activity currentActivity,
             List<Size> sizes, double targetRatio) {
         // Use a very small tolerance because we want an exact match.
-        final double ASPECT_TOLERANCE = 0.001;
+        final double ASPECT_TOLERANCE = (sToleranceMultiplier * 0.001);
         if (sizes == null) return null;
 
         Size optimalSize = null;
