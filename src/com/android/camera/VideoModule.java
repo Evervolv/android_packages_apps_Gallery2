@@ -189,6 +189,9 @@ public class VideoModule implements CameraModule,
     private boolean mRestoreFlash;  // This is used to check if we need to restore the flash
                                     // status when going back from gallery.
 
+    private int mVideoWidth;
+    private int mVideoHeight;
+
     private final MediaSaveService.OnMediaSavedListener mOnVideoSavedListener =
             new MediaSaveService.OnMediaSavedListener() {
                 @Override
@@ -697,17 +700,26 @@ public class VideoModule implements CameraModule,
         editor.apply();
     }
 
+    private boolean cantUsePreviewSizeDueToEffects() {
+        if (!effectsActive()) {
+            return false;
+        }
+        return !mActivity.getResources().getBoolean(R.bool.usePreferredPreviewSizeForEffects);
+    }
+
     @TargetApi(ApiHelper.VERSION_CODES.HONEYCOMB)
     private void getDesiredPreviewSize() {
         mParameters = mActivity.mCameraDevice.getParameters();
         if (ApiHelper.HAS_GET_SUPPORTED_VIDEO_SIZE) {
-            if (mParameters.getSupportedVideoSizes() == null || effectsActive()) {
+            if (mParameters.getSupportedVideoSizes() == null || cantUsePreviewSizeDueToEffects()) {
                 mDesiredPreviewWidth = mProfile.videoFrameWidth;
                 mDesiredPreviewHeight = mProfile.videoFrameHeight;
             } else {  // Driver supports separates outputs for preview and video.
                 List<Size> sizes = mParameters.getSupportedPreviewSizes();
                 Size preferred = mParameters.getPreferredPreviewSizeForVideo();
-                if (preferred == null) {
+
+                if (mActivity.getResources().getBoolean(R.bool.ignorePreferredPreviewSizeForVideo)
+                        || preferred == null) {
                     preferred = sizes.get(0);
                 }
                 int product = preferred.width * preferred.height;
@@ -852,12 +864,13 @@ public class VideoModule implements CameraModule,
         try {
             if (!effectsActive()) {
                 if (ApiHelper.HAS_SURFACE_TEXTURE) {
-                    SurfaceTexture surfaceTexture = ((CameraScreenNail) mActivity.mCameraScreenNail)
-                            .getSurfaceTexture();
-                    if (surfaceTexture == null) {
+                    SurfaceTexture texture = mActivity.getScreenNailTextureForPreviewSize(
+                            mCameraId, mCameraDisplayOrientation, mParameters);
+
+                    if (texture == null) {
                         return; // The texture has been destroyed (pause, etc)
                     }
-                    mActivity.mCameraDevice.setPreviewTextureAsync(surfaceTexture);
+                    mActivity.mCameraDevice.setPreviewTextureAsync(texture);
                 } else {
                     mActivity.mCameraDevice.setPreviewDisplayAsync(mUI.getSurfaceHolder());
                 }
@@ -1143,6 +1156,9 @@ public class VideoModule implements CameraModule,
 
         Intent intent = mActivity.getIntent();
         Bundle myExtras = intent.getExtras();
+
+        mVideoWidth = mProfile.videoFrameWidth;
+        mVideoHeight = mProfile.videoFrameHeight;
 
         long requestedSizeLimit = 0;
         closeVideoFileDescriptor();
@@ -2038,7 +2054,9 @@ public class VideoModule implements CameraModule,
             // We need to restart the preview if preview size is changed.
             Size size = mParameters.getPreviewSize();
             if (size.width != mDesiredPreviewWidth
-                    || size.height != mDesiredPreviewHeight) {
+                    || size.height != mDesiredPreviewHeight
+                    || mProfile.videoFrameWidth != mVideoWidth
+                    || mProfile.videoFrameHeight != mVideoHeight) {
                 if (!effectsActive()) {
                     stopPreview();
                 } else {

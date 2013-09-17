@@ -27,6 +27,8 @@ import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
@@ -68,6 +70,7 @@ import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.crop.CropExtras;
 import com.android.gallery3d.util.UsageStatistics;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -252,6 +255,8 @@ public class PhotoModule
 
     private final Handler mHandler = new MainHandler();
     private PreferenceGroup mPreferenceGroup;
+
+    private int mResetExposure;
 
     private boolean mQuickCapture;
 
@@ -459,6 +464,7 @@ public class PhotoModule
 
     private void onPreviewStarted() {
         mCameraStartUpThread = null;
+        mResetExposure = mParameters.getExposureCompensation();
         setCameraState(IDLE);
         if (!ApiHelper.HAS_SURFACE_TEXTURE) {
             // This may happen if surfaceCreated has arrived.
@@ -714,9 +720,8 @@ public class PhotoModule
         if (mFaceDetectionStarted || mCameraState != IDLE) return;
         if (mParameters.getMaxNumDetectedFaces() > 0) {
             mFaceDetectionStarted = true;
-            CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
             mUI.onStartFaceDetection(mDisplayOrientation,
-                    (info.facing == CameraInfo.CAMERA_FACING_FRONT));
+                    (CameraHolder.instance().getCameraInfo()[mCameraId].facing == CameraInfo.CAMERA_FACING_FRONT));
             mCameraDevice.setFaceDetectionListener(mUI);
             mCameraDevice.startFaceDetection();
         }
@@ -791,7 +796,7 @@ public class PhotoModule
 
         @Override
         public void onPictureTaken(
-                final byte [] jpegData, final android.hardware.Camera camera) {
+                byte [] jpegData, final android.hardware.Camera camera) {
             if (mPaused) {
                 return;
             }
@@ -830,7 +835,11 @@ public class PhotoModule
                         CaptureAnimManager.getAnimationDuration());
             }
             mFocusManager.updateFocusUI(); // Ensure focus indicator is hidden.
-            if (!mIsImageCaptureIntent && !Util.enableZSL()) {
+
+            boolean isSamsungHDR =
+                    (mSceneMode == Util.SCENE_MODE_HDR && Util.needSamsungHDRFormat());
+
+            if (!mIsImageCaptureIntent && (!Util.enableZSL() || isSamsungHDR)) {
                 if (ApiHelper.CAN_START_PREVIEW_IN_JPEG_CALLBACK) {
                     setupPreview();
                 } else {
@@ -838,6 +847,17 @@ public class PhotoModule
                     // immediately after taking a picture will fail. Wait some
                     // time before starting the preview.
                     mHandler.sendEmptyMessageDelayed(SETUP_PREVIEW, 300);
+                }
+            } else if (Util.enableZSL() && !isSamsungHDR) {
+                // In ZSL mode, the preview is not stopped, due to which the
+                // review mode (ImageCapture) doesn't show the captured frame.
+                // Hence stop the preview if ZSL mode is active so that the
+                // preview can be restarted using the onReviewRetakeClicked().
+                if (mIsImageCaptureIntent) {
+                    stopPreview();
+                } else {
+                    mFocusManager.resetTouchFocus();
+                    setCameraState(IDLE);
                 }
             } else {
                 mFocusManager.resetTouchFocus();
@@ -850,7 +870,9 @@ public class PhotoModule
                 ExifInterface exif = Exif.getExif(jpegData);
                 int orientation = Exif.getOrientation(exif);
                 int width, height;
-                if ((mJpegRotation + orientation) % 180 == 0) {
+                if ((mJpegRotation + orientation) % 180 == 0 ||
+                        (mSceneMode == Util.SCENE_MODE_HDR &&
+                            Util.needSamsungHDRFormat())) {
                     width = s.width;
                     height = s.height;
                 } else {
@@ -873,6 +895,28 @@ public class PhotoModule
                                 new Rational(mHeading, 1));
                         exif.setTag(directionRefTag);
                         exif.setTag(directionTag);
+                    }
+
+                    if (isSamsungHDR) {
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        Bitmap bm = Util.decodeYUV422P(jpegData, width, height);
+                        if (mJpegRotation != 0) {
+                            Matrix matrix = new Matrix();
+                            matrix.postRotate(mJpegRotation);
+                            bm = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
+                        }
+                        if (mJpegRotation % 180 != 0) {
+                            int x = height;
+                            int y = width;
+                            width = x;
+                            height = y;
+                        }
+
+                        bm.compress(Bitmap.CompressFormat.JPEG,
+                                    CameraSettings.getJpegQualityIntValue(mPreferences),
+                                    baos);
+
+                        jpegData = baos.toByteArray();
                     }
                     mActivity.getMediaSaveService().addImage(
                             jpegData, title, date, mLocation, width, height,
@@ -898,6 +942,10 @@ public class PhotoModule
             Log.v(TAG, "mJpegCallbackFinishTime = "
                     + mJpegCallbackFinishTime + "ms");
             mJpegPictureCallbackTime = 0;
+
+            // reset exposure
+            mParameters.setExposureCompensation(mResetExposure);
+            mCameraDevice.setParameters(mParameters);
         }
     }
 
@@ -1014,6 +1062,8 @@ public class PhotoModule
             animateFlash();
         }
 
+        //save data
+        mResetExposure = mParameters.getExposureCompensation();
         // Set rotation and gps data.
         int orientation;
         // We need to be consistent with the framework orientation (i.e. the
@@ -1024,6 +1074,11 @@ public class PhotoModule
             orientation = mOrientation;
         }
         mJpegRotation = Util.getJpegRotation(mCameraId, orientation);
+        if (mSceneMode == Util.SCENE_MODE_HDR && Util.needSamsungHDRFormat()) {
+            /* samsung actually speficify max range via exposure compinsation */
+            mParameters.setExposureCompensation(mParameters.getMaxExposureCompensation());
+        }
+        mJpegRotation = Util.getJpegRotation(mCameraId, mOrientation);
         mParameters.setRotation(mJpegRotation);
         Location loc = mLocationManager.getCurrentLocation();
         Util.setGpsParameters(mParameters, loc);
@@ -1043,6 +1098,12 @@ public class PhotoModule
         }
 
         mNamedImages.nameNewImage(mContentResolver, mCaptureStartTime);
+
+        if (Util.enableZSL() &&
+                (mSceneMode != Util.SCENE_MODE_HDR || !Util.needSamsungHDRFormat())) {
+            mRestartPreview = false;
+        }
+
 
         mFaceDetectionStarted = false;
         setCameraState(SNAPSHOT_IN_PROGRESS);
@@ -1396,7 +1457,9 @@ public class PhotoModule
         }
         stopPreview();
         // Release surface texture.
-        ((CameraScreenNail) mActivity.mCameraScreenNail).releaseSurfaceTexture();
+        mActivity.getCameraScreenNail().releaseSurfaceTexture();
+
+        resetScreenOn();
 
         mNamedImages = null;
 
@@ -1454,6 +1517,16 @@ public class PhotoModule
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         Log.v(TAG, "onConfigurationChanged");
+
+        // Wait for camera initialization
+        try {
+            if (mCameraStartUpThread != null) {
+                mCameraStartUpThread.join();
+            }
+        } catch (InterruptedException iex) {
+            // Ignore.
+        }
+
         setDisplayOrientation();
     }
 
@@ -1618,14 +1691,18 @@ public class PhotoModule
         // ICS camera frameworks has a bug. Face detection state is not cleared
         // after taking a picture. Stop the preview to work around it. The bug
         // was fixed in JB.
-        if (mCameraState != PREVIEW_STOPPED) stopPreview();
-
+        if (mCameraState != PREVIEW_STOPPED &&
+                (!mActivity.getResources().getBoolean(R.bool.previewStopsDuringSnapshot) ||
+                 mCameraState != SNAPSHOT_IN_PROGRESS)) {
+            stopPreview();
+        }
         setDisplayOrientation();
 
         if (!mSnapshotOnIdle && !mAspectRatioChanged) {
             // If the focus mode is continuous autofocus, call cancelAutoFocus to
             // resume it because it may have been paused by autoFocus call.
-            if (Util.FOCUS_MODE_CONTINUOUS_PICTURE.equals(mFocusManager.getFocusMode())) {
+            if (Util.FOCUS_MODE_CONTINUOUS_PICTURE.equals(mFocusManager.getFocusMode())
+                    && mCameraState != PREVIEW_STOPPED) {
                 mCameraDevice.cancelAutoFocus();
             }
             mFocusManager.setAeAwbLock(false); // Unlock AE and AWB.
@@ -1633,30 +1710,24 @@ public class PhotoModule
         setCameraParameters(UPDATE_PARAM_ALL);
 
         if (ApiHelper.HAS_SURFACE_TEXTURE) {
-            CameraScreenNail screenNail = (CameraScreenNail) mActivity.mCameraScreenNail;
             if (mUI.getSurfaceTexture() == null) {
-                Size size = mParameters.getPreviewSize();
-                if (mCameraDisplayOrientation % 180 == 0) {
-                    screenNail.setSize(size.width, size.height);
-                } else {
-                    screenNail.setSize(size.height, size.width);
-                }
-                screenNail.enableAspectRatioClamping();
-                mActivity.notifyScreenNailChanged();
-                screenNail.acquireSurfaceTexture();
-                CameraStartUpThread t = mCameraStartUpThread;
-                if (t != null && t.isCanceled()) {
+                if (mCameraStartUpThread != null && mCameraStartUpThread.isCanceled()) {
                     return; // Exiting, so no need to get the surface texture.
                 }
-                mUI.setSurfaceTexture(screenNail.getSurfaceTexture());
-            } else {
-                updatePreviewSize(screenNail);
             }
+            SurfaceTexture texture = mActivity.getScreenNailTextureForPreviewSize(
+                    mCameraId, mCameraDisplayOrientation, mParameters);
+            mUI.setSurfaceTexture(texture);
             mCameraDevice.setDisplayOrientation(mCameraDisplayOrientation);
-            Object st = mUI.getSurfaceTexture();
-            if (st != null) {
-                mCameraDevice.setPreviewTextureAsync((SurfaceTexture) st);
+
+            if (texture == null) {
+                if (mCameraStartUpThread != null && mCameraStartUpThread.isCanceled()) {
+                    return; // Exiting, so no need to get the surface texture.
+                }
+            } else {
+                mCameraDevice.setPreviewTextureAsync(texture);
             }
+
         } else {
             mCameraDevice.setDisplayOrientation(mDisplayOrientation);
             mCameraDevice.setPreviewDisplayAsync(mUI.getSurfaceHolder());
@@ -1674,21 +1745,6 @@ public class PhotoModule
         if (mSnapshotOnIdle) {
             mHandler.post(mDoSnapRunnable);
         }
-    }
-
-    private void updatePreviewSize(CameraScreenNail snail) {
-        Size size = mParameters.getPreviewSize();
-        int w = size.width;
-        int h = size.height;
-        if (mCameraDisplayOrientation % 180 != 0) {
-            w = size.height;
-            h = size.width;
-        }
-        if (snail.getWidth() != w || snail.getHeight() != h) {
-            snail.setSize(w, h);
-        }
-        snail.enableAspectRatioClamping();
-        mActivity.notifyScreenNailChanged();
     }
 
     @Override
@@ -1835,10 +1891,11 @@ public class PhotoModule
         }
 
         if (Util.enableZSL()) {
+            if (Util.sendMagicSamsungZSLCommand()) {
+                mCameraDevice.sendMagicSamsungZSLCommand();
+            }
             // Switch on ZSL mode
             mParameters.set("camera-mode", "1");
-        } else {
-            //mParameters.setCameraMode(0);
         }
 
         // Set JPEG quality.
@@ -1957,10 +2014,12 @@ public class PhotoModule
                         SET_CAMERA_PARAMETERS_WHEN_IDLE, 1000);
             }
         }
-        if (mAspectRatioChanged) {
+
+        if (mAspectRatioChanged || mRestartPreview) {
             Log.e(TAG, "Aspect ratio changed, restarting preview");
             startPreview();
             mAspectRatioChanged = false;
+            mRestartPreview = false;
             mHandler.sendEmptyMessage(START_PREVIEW_DONE);
         }
     }

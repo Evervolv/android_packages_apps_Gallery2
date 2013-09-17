@@ -27,6 +27,7 @@ import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
 import android.media.CamcorderProfile;
+import android.text.TextUtils;
 import android.util.FloatMath;
 import android.util.Log;
 
@@ -430,6 +431,29 @@ public class CameraSettings {
         }
     }
 
+    public static int getJpegQualityIntValue(SharedPreferences pref) {
+        int version = pref.getInt(KEY_VERSION, 0);
+        String qualityString = pref.getString(KEY_JPEG_QUALITY, null);
+
+        if (version >= 2) {
+            if (TextUtils.equals(qualityString, "normal")) {
+                return 65;
+            } else if (TextUtils.equals(qualityString, "fine")) {
+                return 75;
+            }
+            // otherwise fall down to superfine = 85 as default
+        } else {
+            try {
+                return Integer.parseInt(qualityString);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Found unexpected quality value " + qualityString
+                        + ", using default.");
+            }
+        }
+
+        return 85;
+    }
+
     public static int readPreferredCameraId(SharedPreferences pref) {
         return Integer.parseInt(pref.getString(KEY_CAMERA_ID, "0"));
     }
@@ -565,7 +589,7 @@ public class CameraSettings {
         }
     }
 
-    /**
+     /**
      * Enable video mode for certain cameras.
      *
      * @param params
