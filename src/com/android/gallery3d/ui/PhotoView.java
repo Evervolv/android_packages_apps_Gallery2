@@ -1151,6 +1151,8 @@ public class PhotoView extends GLView {
             if (mIgnoreScalingGesture) {
                 return true;
             }
+            // We ignore other scale begin notification if film mode has been changed.
+            if (mModeChanged) return true;
             mPositionController.beginScale(focusX, focusY);
             // We can change mode if we are in film mode, or we are in page
             // mode and at minimal scale.
