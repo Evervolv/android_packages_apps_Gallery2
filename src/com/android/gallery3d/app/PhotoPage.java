@@ -26,7 +26,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.drm.DrmManagerClient;
+import android.drm.DrmManagerClientWrapper;
 import android.drm.DrmStore.Action;
 import android.drm.DrmStore.DrmDeliveryType;
 import android.drm.DrmStore.RightsStatus;
@@ -769,7 +769,7 @@ public abstract class PhotoPage extends ActivityState implements
         }
 
         if (filepath != null && filepath.endsWith(".dcf")) {
-            DrmManagerClient drmClient = new DrmManagerClient(mActivity.getAndroidContext());
+            DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(mActivity.getAndroidContext());
             filepath = filepath.replace("/storage/emulated/0", "/storage/emulated/legacy");
             ContentValues values = drmClient.getMetadata(filepath);
             int drmType = values.getAsInteger("DRM-TYPE");
@@ -1425,13 +1425,9 @@ public abstract class PhotoPage extends ActivityState implements
                 path = uri.getPath();
             }
             if (path.endsWith(".dcf")) {
-                DrmManagerClient drmClient = new DrmManagerClient(activity);
+                DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(activity);
                 path = path.replace("/storage/emulated/0", "/storage/emulated/legacy");
-
-                // This hack is added to work FL. It will remove after the sdcard permission issue solved
                 int status = drmClient.checkRightsStatus(path, Action.PLAY);
-                status = RightsStatus.RIGHTS_VALID;
-
                 if (RightsStatus.RIGHTS_VALID != status) {
                     ContentValues values = drmClient.getMetadata(path);
                     String address = values.getAsString("Rights-Issuer");
