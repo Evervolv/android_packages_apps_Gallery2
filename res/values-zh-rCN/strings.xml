@@ -471,11 +471,6 @@
     <string name="drm_license_info">"DRM 许可证信息"</string>
     <string name="mimetype_not_supported">"无法播放此文件"</string>
     <string name="action_consumes_rights">"播放此媒体需要使用相应权限"</string>
-    <string-array name="title_array_nav_items">
-        <item>@string/timeline_title</item>
-        <item>@string/albums_title</item>
-        <item>@string/videos_title</item>
-    </string-array>
 
     <!-- Timeline screen title -->
     <string name="timeline_title">时间轴</string>

@@ -1167,17 +1167,10 @@ CHAR LIMIT = NONE] -->
     <string name="text_makeup_whiten">Whiten</string>
     <string name="text_makeup_Soften">Soften</string>
 
-    <string-array name="title_array_nav_items">
-        <item>@string/timeline_title</item>
-        <item>@string/albums_title</item>
-        <item>@string/videos_title</item>
-    </string-array>
-
-    <string name="navigation_drawer_title" translatable="false">@string/app_name</string>
     <!-- Timeline screen title -->
     <string name="timeline_title">Timeline</string>
     <!-- Albums screen title -->
-    <string name="albums_title" translatable="false">@string/tab_albums</string>
+    <string name="albums_title" translatable="false">Albums</string>
     <!-- Videos screen title -->
     <string name="videos_title">Videos</string>
     <string name="action_viewtype_list">List view</string>
@@ -1186,7 +1179,6 @@ CHAR LIMIT = NONE] -->
     <string name="tvEmptyVideos">No videos found</string>
     <string name="text_makeup_trimface">Trimface</string>
     <string name="text_makeup_bigeye">Bigeye</string>
-    <string name="drawer_desc" translatable="false">drawer</string>
     <string name="truescanner_normal">Normal</string>
     <string name="truescanner_white">WhiteBoard</string>
     <string name="truescanner">TrueScanner</string>
