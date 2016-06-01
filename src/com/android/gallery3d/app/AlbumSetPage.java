@@ -277,6 +277,13 @@ public class AlbumSetPage extends ActivityState implements
     }
 
     private void pickAlbum(int slotIndex) {
+        if (mActivity.getStateManager().getStateCount() >= 1) {
+            android.widget.Toolbar toolbar = mActivity.getToolbar();
+            if (toolbar != null) {
+                ((GalleryActivity) mActivity).toggleNavBar(false);
+            }
+        }
+
         if (!mIsActive) return;
 
         MediaSet targetSet = mAlbumSetDataAdapter.getMediaSet(slotIndex);
@@ -656,10 +663,6 @@ public class AlbumSetPage extends ActivityState implements
                 mActivity.getStateManager().startState(ManageCachePage.class, data);
                 return true;
             }
-            case R.id.action_sync_picasa_albums: {
-                PicasaSource.requestSync(activity);
-                return true;
-            }
             /*case R.id.action_settings: {
                 activity.startActivity(new Intent(activity, GallerySettings.class));
                 return true;
@@ -698,12 +701,12 @@ public class AlbumSetPage extends ActivityState implements
                 //mActionBar.disableClusterMenu(true);
                 mActionModeHandler.startActionMode();
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                ((GalleryActivity)mActivity).toggleNavDrawer(false);
+                ((GalleryActivity) mActivity).toggleNavBar(false);
                 break;
             }
             case SelectionManager.LEAVE_SELECTION_MODE: {
                 mActionModeHandler.finishActionMode();
-                ((GalleryActivity)mActivity).toggleNavDrawer(true);
+                ((GalleryActivity) mActivity).toggleNavBar(true);
                 /*if (mShowClusterMenu) {
                     mActionBar.enableClusterMenu(mSelectedAction, this);
                 }*/

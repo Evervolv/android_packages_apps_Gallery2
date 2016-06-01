@@ -15,14 +15,20 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <style name="Theme.GalleryBase" parent="android:Theme.Holo">
+    <style name="Theme.GalleryBase" parent="android:Theme.Material">
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primaryDark</item>
+        <item name="android:colorAccent">@color/accent</item>
         <item name="listPreferredItemHeightSmall">48dp</item>
         <item name="switchStyle">@android:style/Widget.CompoundButton</item>
     </style>
 
-    <style name="Theme.Gallery.Dialog" parent="android:Theme.Holo.Dialog" />
+    <style name="Theme.Gallery.Dialog" parent="android:Theme.Material.Dialog" />
 
     <style name="Theme.Gallery" parent="android:Theme.Material.Light">
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primaryDark</item>
+        <item name="android:colorAccent">@color/accent</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
@@ -46,12 +52,12 @@
     <style name="Theme.Crop" parent="Theme.GalleryBase">
         <item name="android:displayOptions"></item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:actionBarStyle">@style/Holo.ActionBar</item>
+        <item name="android:actionBarStyle">@style/Material.ActionBar</item>
         <item name="android:colorBackground">@null</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowBackground">@drawable/filtershow_tiled_background</item>
     </style>
-    <style name="Holo.ActionBar" parent="android:Widget.Holo.ActionBar">
+    <style name="Material.ActionBar" parent="android:Widget.Material.ActionBar">
         <item name="android:displayOptions">useLogo|showHome</item>
         <item name="android:background">@drawable/actionbar_translucent</item>
         <item name="android:backgroundStacked">@null</item>
@@ -60,14 +66,15 @@
         <item name="android:background">@null</item>
         <item name="android:src">@drawable/icn_media_play</item>
     </style>
-    <style name="DialogPickerTheme" parent="Theme.Gallery">
+    <style name="DialogPickerTheme" parent="android:Theme.Material">
+        <item name="android:colorPrimary">@color/primary</item>
+        <item name="android:colorPrimaryDark">@color/primaryDark</item>
     </style>
     <style name="Theme.ProxyLauncher" parent="@android:Theme.Translucent.NoTitleBar">
     </style>
-    <bool name="picker_is_dialog">false</bool>
-    <color name="darker_transparent">#C1000000</color>
-    <style name="ActionBarTwoLinePrimary" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title"></style>
-    <style name="ActionBarTwoLineSecondary" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle"></style>
+
+    <style name="ActionBarTwoLinePrimary" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title"/>
+    <style name="ActionBarTwoLineSecondary" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle"/>
     <style name="ActionBarTwoLineItem">
         <item name="android:background">@drawable/action_bar_two_line_background</item>
     </style>
@@ -310,7 +317,7 @@
         <item name="android:background">@drawable/bg_pressed</item>
     </style>
 
-    <style name="AppTheme" parent="android:Theme.Material.Light">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -332,6 +339,8 @@
 
     <style name="ToolbarTheme" parent="android:Theme.Material" >
         <item name="android:actionOverflowButtonStyle">@style/WhiteOverflow</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primaryDark</item>
     </style>
 
     <style name="ToolbarTitleStyle" parent="android:TextAppearance.Material.Widget.Toolbar.Title">
@@ -341,13 +350,13 @@
     <style name="ToolbarPopUpTheme" parent="android:Theme.Material.Light" />
 
     <!-- Styles -->
-    <style name="MyOverFlow" parent="@android:style/Widget.DeviceDefault.ActionButton">
+    <style name="MyOverFlow" parent="@android:style/Widget.Material.ActionButton.Overflow">
         <item name="android:src">@drawable/multiselect_more</item>
     </style>
-    <style name="WhiteOverflow" parent="@android:style/Widget.DeviceDefault.ActionButton">
+    <style name="WhiteOverflow" parent="@android:style/Widget.Material.ActionButton.Overflow">
         <item name="android:src">@drawable/more</item>
     </style>
-    <style name="FilterShowActionBar" parent="@android:style/Widget.DeviceDefault.Light.ActionBar">
+    <style name="FilterShowActionBar" parent="@android:style/Widget.Material.Light.ActionBar">
         <item name="android:background">@color/edit_actionbar_background</item>
         <item name="android:contentInsetStart">0dp</item>
     </style>

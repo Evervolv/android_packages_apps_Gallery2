@@ -287,10 +287,7 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
         } else if (mActivity.getStateManager().getStateCount() > 1) {
             Toolbar toolbar = mActivity.getToolbar();
             if (toolbar != null) {
-                toolbar.setNavigationContentDescription(
-                        mActivity.getResources().getString(R.string.drawer_desc));
-                toolbar.setNavigationIcon(R.drawable.drawer);
-                ((GalleryActivity) mActivity).toggleNavDrawer(true);
+                ((GalleryActivity) mActivity).toggleNavBar(true);
             }
             super.onBackPressed();
         } else if (mParentMediaSetString != null) {
@@ -498,20 +495,6 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
 
         setContentPane(mRootPane);
 
-        boolean enableHomeButton = (mActivity.getStateManager().getStateCount() > 1) |
-                mParentMediaSetString != null;
-        //GalleryActionBar actionBar = mActivity.getGalleryActionBar();
-        if (mIsVideoScreen) {
-            //if from video screen, show display navigation icon as home and title
-            mActionBar.setDisplayHome(true, true);
-        } else {
-            mActionBar.setDisplayOptions(enableHomeButton, true);
-        }
-        Toolbar toolBar = mActivity.getToolbar();
-        if (enableHomeButton && toolBar != null) {
-            toolBar.setNavigationContentDescription("back");
-            toolBar.setNavigationIcon(R.drawable.back);
-        }
         // Set the reload bit here to prevent it exit this page in clearLoadingBit().
         setLoadingBit(BIT_LOADING_RELOAD);
         mLoadingFailed = false;
@@ -655,7 +638,6 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
             menu.findItem(R.id.action_camera).setVisible(
                    GalleryUtils.isAnyCameraAvailable(mActivity));
             menu.findItem(R.id.action_slideshow).setVisible(!mIsVideoScreen);
-            menu.findItem(R.id.action_sync_picasa_albums).setVisible(mIsVideoScreen);
             MenuItem item = menu.findItem(R.id.action_view_type);
             updateMenuTitle(item);
             updateMenuTitle(menu.findItem(R.id.action_select));
@@ -810,10 +792,14 @@ public class AlbumPage extends ActivityState implements GalleryActionBar.Cluster
             case SelectionManager.ENTER_SELECTION_MODE: {
                 mActionModeHandler.startActionMode();
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                ((GalleryActivity) mActivity).toggleNavBar(false);
                 break;
             }
             case SelectionManager.LEAVE_SELECTION_MODE: {
                 mActionModeHandler.finishActionMode();
+                if (mActivity.getStateManager().getStateCount() <= 1) {
+                    ((GalleryActivity) mActivity).toggleNavBar(true);
+                }
                 mRootPane.invalidate();
                 updateMenuItem();
                 break;
