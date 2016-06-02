@@ -1273,6 +1273,9 @@ public class FilterShowActivity extends FragmentActivity implements OnItemClickL
     }
 
     void resetHistory() {
+        if (mMasterImage == null) {
+            return;
+        }
         HistoryManager adapter = mMasterImage.getHistory();
         adapter.reset();
         HistoryItem historyItem = adapter.getItem(0);
