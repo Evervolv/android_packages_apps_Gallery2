@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -189,6 +190,7 @@ public class GalleryActionBar implements OnNavigationListener {
 
     public GalleryActionBar(AbstractGalleryActivity activity) {
         mActionBar = activity.getActionBar();
+        mActionBar.setElevation(0);
         mContext = activity.getAndroidContext();
         mActivity = activity;
         mInflater = ((Activity) mActivity).getLayoutInflater();
@@ -437,6 +439,15 @@ public class GalleryActionBar implements OnNavigationListener {
             mShareActionProvider.setShareIntent(shareIntent);
             mShareActionProvider.setOnShareTargetSelectedListener(
                 onShareListener);
+        }
+    }
+
+    public void setTransparentMode(boolean value) {
+        if (value) {
+            mActionBar.setBackgroundDrawable(mActivity.getResources().getDrawable(R.drawable.root_top_bg));
+        } else {
+            mActionBar.setBackgroundDrawable(
+                    new ColorDrawable(mActivity.getResources().getColor(R.color.primary)));
         }
     }
 }
