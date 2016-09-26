@@ -36,6 +36,8 @@ LOCAL_JAVA_LIBRARIES += org.apache.http.legacy
 
 include $(BUILD_PACKAGE)
 
+include $(call all-makefiles-under, jni)
+
 ifeq ($(strip $(LOCAL_PACKAGE_OVERRIDES)),)
 
 # Use the following include to make gallery test apk

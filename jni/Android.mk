@@ -9,12 +9,11 @@ LOCAL_SRC_FILES := jni_egl_fence.cpp
 
 LOCAL_SDK_VERSION := 9
 
+LOCAL_SHARED_LIBRARIES := liblog libEGL
+
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_MODULE := libjni_eglfence
-
-LOCAL_LDLIBS := -llog -lEGL
-
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -23,6 +22,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_CPP_EXTENSION := .cc
+LOCAL_SHARED_LIBRARIES := liblog libjnigraphics
 LOCAL_SDK_VERSION := 9
 LOCAL_MODULE    := libjni_filtershow_filters
 LOCAL_SRC_FILES := filters/gradient.c \
@@ -47,7 +47,6 @@ LOCAL_SRC_FILES := filters/gradient.c \
 
 LOCAL_CFLAGS    += -ffast-math -O3 -funroll-loops -Wno-unused-parameter
 LOCAL_CFLAGS += -Wall -Wextra
-LOCAL_LDLIBS := -llog -ljnigraphics
 LOCAL_ARM_MODE := arm
 
 include $(BUILD_SHARED_LIBRARY)
