@@ -43,6 +43,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ProgressBar;
 
 import com.android.gallery3d.R;
 import com.android.gallery3d.common.ApiHelper;
@@ -65,7 +66,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     private GalleryActionBar mActionBar;
     private TransitionStore mTransitionStore = new TransitionStore();
     private PanoramaViewHelper mPanoramaViewHelper;
-
+    private ProgressBar mProgress;
     private AlertDialog mAlertDialog = null;
     private BroadcastReceiver mMountReceiver = new BroadcastReceiver() {
         @Override
@@ -159,6 +160,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     public void setContentView(int resId) {
         super.setContentView(resId);
         mGLRootView = (GLRootView) findViewById(R.id.gl_root_view);
+        mProgress = (ProgressBar) findViewById(R.id.gallery_root_progress);
     }
 
     protected void onStorageReady() {
@@ -411,5 +413,12 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         }
+    }
+
+    protected void showProgress() {
+        mProgress.setVisibility(View.VISIBLE);
+    }
+    protected void hideProgress() {
+        mProgress.setVisibility(View.GONE);
     }
 }

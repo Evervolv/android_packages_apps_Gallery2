@@ -599,6 +599,13 @@ public abstract class PhotoPage extends ActivityState implements
                     showDetails();
                 }
                 return;
+            case R.id.photopage_bottom_control_map:
+                double latlng[] = new double[2];
+                mCurrentPhoto.getLatLong(latlng);
+                if (GalleryUtils.isValidLocation(latlng[0], latlng[1])) {
+                    GalleryUtils.showOnMap(mActivity, latlng[0], latlng[1]);
+                }
+                return;
             default:
                 return;
         }
@@ -673,6 +680,14 @@ public abstract class PhotoPage extends ActivityState implements
                         && !mPhotoView.getFilmMode()
                         && (mCurrentPhoto.getSupportedOperations() & MediaItem.SUPPORT_EDIT) != 0
                         && mCurrentPhoto.getMediaType() == MediaObject.MEDIA_TYPE_IMAGE;
+    }
+
+    private boolean canShowOnMap() {
+        if (mCurrentPhoto != null) {
+            int supportedOperations = mCurrentPhoto.getSupportedOperations();
+            return (supportedOperations & MediaObject.SUPPORT_SHOW_ON_MAP) != 0;
+        }
+        return false;
     }
 
     private void launchPhotoEditor() {
@@ -797,6 +812,7 @@ public abstract class PhotoPage extends ActivityState implements
         // enable/disable edit button
         if (mBottomControls != null) {
             mBottomControls.enableItem(R.id.photopage_bottom_control_edit, canEditPhoto());
+            mBottomControls.enableItem(R.id.photopage_bottom_control_map, canShowOnMap());
         }
     }
 
