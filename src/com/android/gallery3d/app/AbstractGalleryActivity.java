@@ -63,9 +63,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     private GLRootView mGLRootView;
     private StateManager mStateManager;
     private GalleryActionBar mActionBar;
-    private OrientationManager mOrientationManager;
     private TransitionStore mTransitionStore = new TransitionStore();
-    private boolean mDisableToggleStatusBar = true;
     private PanoramaViewHelper mPanoramaViewHelper;
 
     private AlertDialog mAlertDialog = null;
@@ -81,8 +79,6 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStoragePath();
-        mOrientationManager = new OrientationManager(this);
-        toggleStatusBarByOrientation();
         getWindow().setBackgroundDrawable(null);
         mPanoramaViewHelper = new PanoramaViewHelper(this);
         mPanoramaViewHelper.onCreate();
@@ -121,7 +117,6 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         mStateManager.onConfigurationChange(config);
         getGalleryActionBar().onConfigurationChanged();
         invalidateOptionsMenu();
-        toggleStatusBarByOrientation();
     }
 
     @Override
@@ -158,10 +153,6 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
 
     public GLRootView getGLRootView() {
         return mGLRootView;
-    }
-
-    public OrientationManager getOrientationManager() {
-        return mOrientationManager;
     }
 
     @Override
@@ -238,13 +229,11 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
             mGLRootView.unlockRenderThread();
         }
         mGLRootView.onResume();
-        mOrientationManager.resume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mOrientationManager.pause();
         mGLRootView.onPause();
         mGLRootView.lockRenderThread();
         try {
@@ -307,22 +296,6 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
             return getStateManager().itemSelected(item);
         } finally {
             root.unlockRenderThread();
-        }
-    }
-
-    protected void disableToggleStatusBar() {
-        mDisableToggleStatusBar = true;
-    }
-
-    // Shows status bar in portrait view, hide in landscape view
-    private void toggleStatusBarByOrientation() {
-        if (mDisableToggleStatusBar) return;
-
-        Window win = getWindow();
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            win.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        } else {
-            win.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
     }
 
@@ -421,6 +394,22 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
                 | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
+    }
+
+    public void setKeepScreenOn(boolean keepScreenOn) {
+        if (keepScreenOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
+    public void setDismissKeyguard(boolean dismissKeyguard) {
+        if (dismissKeyguard) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         }
     }
 }
