@@ -347,11 +347,9 @@
                 android:name="com.android.gallery3d.gadget.WidgetClickHandler"
                 android:theme="@android:style/Theme.NoDisplay" />
         <activity android:name="com.android.gallery3d.app.DialogPicker"
-                android:configChanges="keyboardHidden|orientation|screenSize"
-                android:theme="@style/DialogPickerTheme"/>
+                android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity android:name="com.android.gallery3d.app.AlbumPicker"
-                android:configChanges="keyboardHidden|orientation|screenSize"
-                android:theme="@style/DialogPickerTheme"/>
+                android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity android:name="com.android.gallery3d.gadget.WidgetTypeChooser"
                 android:configChanges="keyboardHidden|orientation|screenSize"
                 android:theme="@style/Theme.Gallery.Dialog"/>
@@ -418,8 +416,7 @@
         <activity android:name="org.codeaurora.gallery3d.video.BookmarkActivity"
                 android:configChanges="keyboardHidden|orientation|screenSize"
                 android:icon="@drawable/ic_menu_display_bookmark"
-                android:label="@string/bookmark_list"
-                android:theme="@android:style/Theme.Holo" >
+                android:label="@string/bookmark_list" >
             <intent-filter>
                 <action android:name="org.codeaurora.bookmark.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
