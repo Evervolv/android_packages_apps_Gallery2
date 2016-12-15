@@ -32,6 +32,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.TwoLineListItem;
 
@@ -393,6 +394,8 @@ public class GalleryActionBar implements OnNavigationListener {
     }
 
     private Menu mActionBarMenu;
+    private ShareActionProvider mSharePanoramaActionProvider;
+    private ShareActionProvider mShareActionProvider;
     private Intent mSharePanoramaIntent;
     private Intent mShareIntent;
 
@@ -402,32 +405,20 @@ public class GalleryActionBar implements OnNavigationListener {
 
         MenuItem item = menu.findItem(R.id.action_share_panorama);
         if (item != null) {
-            item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    if (mSharePanoramaIntent != null) {
-                        Intent intent = Intent.createChooser(mSharePanoramaIntent, null);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        mContext.startActivity(intent);
-                    }
-                    return true;
-                }
-            });
+            mSharePanoramaActionProvider = (ShareActionProvider)
+                item.getActionProvider();
+            mSharePanoramaActionProvider
+                .setShareHistoryFileName("panorama_share_history.xml");
+            mSharePanoramaActionProvider.setShareIntent(mSharePanoramaIntent);
         }
 
         item = menu.findItem(R.id.action_share);
         if (item != null) {
-            item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    if (mShareIntent != null) {
-                        Intent intent = Intent.createChooser(mShareIntent, null);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        mContext.startActivity(intent);
-                    }
-                    return true;
-                }
-            });
+            mShareActionProvider = (ShareActionProvider)
+                item.getActionProvider();
+            mShareActionProvider
+                .setShareHistoryFileName("share_history.xml");
+            mShareActionProvider.setShareIntent(mShareIntent);
         }
     }
 
@@ -435,8 +426,17 @@ public class GalleryActionBar implements OnNavigationListener {
         return mActionBarMenu;
     }
 
-    public void setShareIntents(Intent sharePanoramaIntent, Intent shareIntent) {
+    public void setShareIntents(Intent sharePanoramaIntent, Intent shareIntent,
+        ShareActionProvider.OnShareTargetSelectedListener onShareListener) {
         mSharePanoramaIntent = sharePanoramaIntent;
+        if (mSharePanoramaActionProvider != null) {
+            mSharePanoramaActionProvider.setShareIntent(sharePanoramaIntent);
+        }
         mShareIntent = shareIntent;
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(shareIntent);
+            mShareActionProvider.setOnShareTargetSelectedListener(
+                onShareListener);
+        }
     }
 }
