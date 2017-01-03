@@ -20,10 +20,6 @@ import android.provider.MediaStore;
 
 public class IntentHelper {
 
-    public static Intent getCameraIntent() {
-        return new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
-    }
-
     public static Intent getGalleryIntent() {
         return new Intent(Intent.ACTION_MAIN)
             .setClassName("com.android.gallery3d", "com.android.gallery3d.app.GalleryActivity");
