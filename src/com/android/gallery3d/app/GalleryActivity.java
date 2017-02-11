@@ -91,6 +91,7 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[],
             int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case PERMISSION_REQUEST_STORAGE: {
                 if (checkPermissionGrantResults(grantResults)) {
