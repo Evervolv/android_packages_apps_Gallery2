@@ -38,7 +38,7 @@
                  android:layout_width="match_parent"
                  android:visibility="visible"
                  android:layout_height="wrap_content"
-                 android:layout_gravity="center_horizontal"
+                 android:layout_gravity="center"
                  android:paddingRight="5dp"
                  android:paddingLeft="5dp"
                  android:background="@color/crop_panel_background_color"
