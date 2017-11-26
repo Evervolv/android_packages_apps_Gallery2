@@ -45,7 +45,7 @@ LOCAL_SRC_FILES := filters/gradient.c \
                    filters/tinyplanet.cc \
                    filters/kmeans.cc
 
-LOCAL_CFLAGS    += -ffast-math -O3 -funroll-loops -Wno-unused-parameter
+LOCAL_CFLAGS    += -O3 -funroll-loops -Wno-unused-parameter
 LOCAL_CFLAGS += -Wall -Wextra
 LOCAL_ARM_MODE := arm
 
