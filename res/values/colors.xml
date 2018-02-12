@@ -16,7 +16,6 @@
 <resources>
 
     <color name="default_background">@color/white</color>
-    <color name="ic_launcher_gallery_background">#4285f4</color>
 
     <!-- configuration for album set page -->
     <color name="albumset_background">@color/white</color>
