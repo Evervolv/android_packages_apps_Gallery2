@@ -25,12 +25,12 @@ import android.net.Uri;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.widget.Toast;
+import androidx.core.content.FileProvider;
 
 import org.codeaurora.gallery.R;
 import com.android.gallery3d.data.MediaItem;
 import com.android.gallery3d.util.SaveVideoFileInfo;
 import com.android.gallery3d.util.SaveVideoFileUtils;
-import android.support.v4.content.FileProvider;
 
 import java.io.IOException;
 
