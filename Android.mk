@@ -29,8 +29,8 @@ LOCAL_AAPT_FLAGS := \
     --extra-packages android.support.v7.appcompat
 
 LOCAL_PACKAGE_NAME := Gallery2
-
 LOCAL_PRIVILEGED_MODULE := true
+LOCAL_CERTIFICATE := platform
 
 LOCAL_PRIVATE_PLATFORM_APIS:=true
 
