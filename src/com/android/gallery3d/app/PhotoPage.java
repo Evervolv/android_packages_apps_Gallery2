@@ -121,7 +121,6 @@ public abstract class PhotoPage extends ActivityState implements
     public static final String KEY_RETURN_INDEX_HINT = "return-index-hint";
     public static final String KEY_SHOW_WHEN_LOCKED = "show_when_locked";
     public static final String KEY_IN_CAMERA_ROLL = "in_camera_roll";
-    public static final String KEY_READONLY = "read-only";
     public static final String KEY_FROM_VIDEOS_SCREEN = "from-video-screen";
     public static final String KEY_FROM_TIMELINE_SCREEN = "from-timeline-screen";
 
@@ -166,7 +165,6 @@ public abstract class PhotoPage extends ActivityState implements
     private boolean mShowSpinner;
     private String mSetPathString;
     // This is the original mSetPathString before adding the camera preview item.
-    private boolean mReadOnlyView = false;
     private String mOriginalSetPathString;
     private AppBridge mAppBridge;
     private SnailItem mScreenNailItem;
@@ -405,7 +403,6 @@ public abstract class PhotoPage extends ActivityState implements
         };
 
         mSetPathString = data.getString(KEY_MEDIA_SET_PATH);
-        mReadOnlyView = data.getBoolean(KEY_READONLY);
         mOriginalSetPathString = mSetPathString;
         String itemPathString = data.getString(KEY_MEDIA_ITEM_PATH);
         Path itemPath = itemPathString != null ?
@@ -652,7 +649,6 @@ public abstract class PhotoPage extends ActivityState implements
         case R.id.photopage_bottom_control_edit:
             return mHaveImageEditor
                     && mShowBars
-                    && !mReadOnlyView
                     && !mPhotoView.getFilmMode()
                     && (mCurrentPhoto.getSupportedOperations() & MediaItem.SUPPORT_EDIT) != 0
                     && mCurrentPhoto.getMediaType() == MediaObject.MEDIA_TYPE_IMAGE;
@@ -660,7 +656,7 @@ public abstract class PhotoPage extends ActivityState implements
             mShareIntent = new Intent(Intent.ACTION_SEND);
             return mShowBars;
         case R.id.photopage_bottom_control_delete:
-            return mShowBars && !mReadOnlyView;
+            return mShowBars;
         default:
             return false;
         }
@@ -881,9 +877,6 @@ public abstract class PhotoPage extends ActivityState implements
         if (mCurrentPhoto == null) return;
 
         int supportedOperations = mCurrentPhoto.getSupportedOperations();
-        if (mReadOnlyView) {
-            supportedOperations &= ~MediaObject.SUPPORT_EDIT;
-        }
         if (mSecureAlbum != null) {
             supportedOperations &= MediaObject.SUPPORT_DELETE;
         } else {
