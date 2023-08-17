@@ -1884,10 +1884,6 @@ public class FilterShowActivity extends AbstractPermissionActivity implements On
                 return;
             }
 
-            if (null == CachingPipeline.getRenderScriptContext()) {
-                Log.v(LOGTAG, "RenderScript context destroyed during load");
-                return;
-            }
             final View imageShow = findViewById(R.id.imageShow);
             imageShow.setVisibility(View.VISIBLE);
 
